@@ -5,8 +5,8 @@
 
 	<groupId>com.yhr.parent</groupId>
 	<artifactId>spring-boot-common-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<version>1.3.5-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
 	<name>spring-boot-common-parent</name>
 	<description>Demo project for Spring Boot</description>
@@ -21,6 +21,12 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<swagger.api.host>localhost:8080</swagger.api.host>
+		<swagger.api.title>用户管理</swagger.api.title>
+		<swagger.scheme>http</swagger.scheme>
+		<swagger.api.version>v1</swagger.api.version>
+		<swagger.api.description>用户管理相关接口</swagger.api.description>
+		<swagger.api.location>com.yhr.controller</swagger.api.location>
 	</properties>
 
 	<dependencies>
@@ -34,6 +40,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--集成swagger插件生成api文档-->
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-core</artifactId>
+			<version>1.5.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -42,8 +54,117 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>com.github.kongchen</groupId>
+				<artifactId>swagger-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<apiSources>
+						<apiSource>
+							<springmvc>true</springmvc>
+							<locations>${swagger.api.location}</locations>
+							<schemes>${swagger.scheme}</schemes>
+							<host>${swagger.api.host}</host>
+							<basePath></basePath>
+							<info>
+								<title>${swagger.api.title}</title>
+								<version>${swagger.api.version}</version>
+								<description>${swagger.api.description}</description>
+								<termsOfService>
+									http://www.github.com/kongchen/swagger-maven-plugin
+								</termsOfService>
+								<contact>
+									<email>kongchen@gmail.com</email>
+									<name>Kong Chen</name>
+									<url>http://kongch.com</url>
+								</contact>
+							</info>
+							<!--Support classpath or file absolute path here. 1) classpath e.g: "classpath:/markdown.hbs", "classpath:/templates/hello.html" 2) file e.g: "${basedir}/src/main/resources/markdown.hbs", "${basedir}/src/main/resources/template/hello.html"-->
+							<templatePath>classpath:/templates/strapdown.html.hbs</templatePath>
+							<outputPath>${basedir}/generated/document.html</outputPath>
+							<swaggerDirectory>${basedir}/generated/swagger-ui</swaggerDirectory>
+						</apiSource>
+					</apiSources>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+		<filters>
+			<filter>src/main/filters/filter-${env}.properties</filter>
+		</filters>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/filters/resources/${env}</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>readme.txt</exclude>
+				</excludes>
+			</resource>
+		</resources>
 	</build>
-
-
+	<profiles>
+		<!--本地环境-->
+		<profile>
+			<id>localhost</id>
+			<properties>
+				<env>localhost</env>
+			</properties>
+		</profile>
+		<!--家里使用的环境-->
+		<profile>
+			<id>home</id>
+			<properties>
+				<env>home</env>
+			</properties>
+		</profile>
+		<!--开发环境-->
+		<profile>
+			<id>development</id>
+			<properties>
+				<env>development</env>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<!--测试环境-->
+		<profile>
+			<id>test</id>
+			<properties>
+				<env>test</env>
+			</properties>
+		</profile>
+		<!--压测环境-->
+		<profile>
+			<id>pressure</id>
+			<properties>
+				<env>pressure</env>
+			</properties>
+		</profile>
+		<!--预生产环境-->
+		<profile>
+			<id>preproduction</id>
+			<properties>
+				<env>preproduction</env>
+			</properties>
+		</profile>
+		<!--生产环境-->
+		<profile>
+			<id>product</id>
+			<properties>
+				<env>product</env>
+			</properties>
+		</profile>
+	</profiles>
 </project>
